@@ -1,0 +1,5 @@
+{
+  "name": "HS Code Recognizer MVP",
+  "description": "An intelligent tool that analyzes product images and suggests potential Harmonized System (HS) codes, simplifying customs classification for international trade.",
+  "requestFramePermissions": []
+}
