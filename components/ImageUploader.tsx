@@ -50,13 +50,13 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, t }
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            className={`flex flex-col items-center justify-center w-full h-80 border-4 border-dashed rounded-xl cursor-pointer transition-colors duration-300 ${isDragging ? 'border-indigo-500 bg-indigo-50 dark:bg-gray-700' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'}`}
+            className={`flex flex-col items-center justify-center w-full h-80 border-4 border-dashed rounded-xl cursor-pointer transition-colors duration-300 ${isDragging ? 'border-indigo-500/80 bg-indigo-500/10' : 'border-slate-400/50 dark:border-slate-600/50 hover:border-slate-500/70 dark:hover:border-slate-500/70'}`}
         >
-            <UploadCloud size={60} strokeWidth={1} className="text-gray-400 dark:text-gray-500 mb-4" />
-            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+            <UploadCloud size={60} strokeWidth={1} className="text-slate-500 dark:text-slate-400 mb-4" />
+            <p className="text-lg font-semibold text-slate-800 dark:text-slate-200">
                 <span className="text-indigo-600 dark:text-indigo-400">{t.uploaderTitle}</span> {t.uploaderTitleHighlight}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{t.uploaderSubtitle}</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">{t.uploaderSubtitle}</p>
             <input
                 id="image-upload"
                 type="file"

@@ -20,8 +20,28 @@
   }
 }
 </script>
+<script>
+  // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+</script>
+<style>
+    @keyframes pulse-slow {
+      0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.4; }
+      50% { transform: scale(1.2) rotate(10deg); opacity: 0.6; }
+    }
+    .animate-pulse-slow {
+      animation: pulse-slow 12s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    .animation-delay-4000 {
+      animation-delay: -5s;
+    }
+</style>
 </head>
-  <body class="bg-gray-100 dark:bg-gray-900">
+  <body class="bg-slate-100 dark:bg-slate-900">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

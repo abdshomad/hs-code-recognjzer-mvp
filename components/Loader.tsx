@@ -34,10 +34,10 @@ export const Loader: React.FC<LoaderProps> = ({ message, t }) => {
   return (
     <div className="flex flex-col items-center justify-center p-8">
       <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-indigo-600 dark:border-indigo-400"></div>
-      <p className="mt-4 text-lg text-center font-semibold text-gray-700 dark:text-gray-300 h-6">
+      <p className="mt-4 text-lg text-center font-semibold text-slate-700 dark:text-slate-300 h-6">
         {displayMessage}
       </p>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.loaderMoment}</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t.loaderMoment}</p>
     </div>
   );
 };

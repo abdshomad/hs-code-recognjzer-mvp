@@ -8,7 +8,7 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ t }) => {
   return (
     <footer className="w-full text-center p-4 mt-8">
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-sm text-slate-500 dark:text-slate-400">
         {t.footerText}
       </p>
     </footer>

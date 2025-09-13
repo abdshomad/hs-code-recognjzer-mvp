@@ -50,7 +50,7 @@ export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ content }) => 
     const listTag = isNumbered ? 'ol' : 'ul';
     const listClass = isNumbered ? 'list-decimal' : 'list-disc';
     
-    const html = `<${listTag} class="${listClass} list-inside space-y-1 text-gray-600 dark:text-gray-300 text-sm">${listItems}</${listTag}>`;
+    const html = `<${listTag} class="${listClass} list-inside space-y-1 text-slate-600 dark:text-slate-300 text-sm">${listItems}</${listTag}>`;
 
     return { __html: html };
   };

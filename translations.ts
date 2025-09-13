@@ -64,6 +64,11 @@ export const translations = {
     refinedTitle: 'Final Prediction',
     refinedSubtitle: 'Based on your selection: "{userAnswer}"',
     confirmedBadge: 'Confirmed',
+
+    // Theme Toggle
+    themeLight: 'Light Mode',
+    themeDark: 'Dark Mode',
+    themeSystem: 'System Default',
   },
   id: {
     // Header
@@ -130,6 +135,11 @@ export const translations = {
     refinedTitle: 'Prediksi Akhir',
     refinedSubtitle: 'Berdasarkan pilihan Anda: "{userAnswer}"',
     confirmedBadge: 'Terkonfirmasi',
+
+    // Theme Toggle
+    themeLight: 'Mode Terang',
+    themeDark: 'Mode Gelap',
+    themeSystem: 'Default Sistem',
   },
   ja: {
     // Header
@@ -196,6 +206,11 @@ export const translations = {
     refinedTitle: '最終予測',
     refinedSubtitle: 'あなたの選択に基づく: "{userAnswer}"',
     confirmedBadge: '確定済み',
+
+    // Theme Toggle
+    themeLight: 'ライトモード',
+    themeDark: 'ダークモード',
+    themeSystem: 'システムデフォルト',
   }
 };
 
