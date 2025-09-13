@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { HsCodePrediction } from '../types';
 import { CheckCircle2, Info } from 'lucide-react';
 import type { translations, Language } from '../translations';
 import { MarkdownDisplay } from './MarkdownDisplay';
+import { CardActions } from './CardActions';
 
 interface RefinedResultDisplayProps {
   prediction: HsCodePrediction;
@@ -12,6 +13,8 @@ interface RefinedResultDisplayProps {
 }
 
 export const RefinedResultDisplay: React.FC<RefinedResultDisplayProps> = ({ prediction, userAnswer, t, language }) => {
+  const [cardNode, setCardNode] = useState<HTMLDivElement | null>(null);
+
   return (
     <div className="p-6 md:p-10 bg-gray-50 dark:bg-gray-900/50 border-t-2 border-dashed border-gray-300 dark:border-gray-700">
        {language === 'id' && (
@@ -25,8 +28,9 @@ export const RefinedResultDisplay: React.FC<RefinedResultDisplayProps> = ({ pred
         <p className="text-gray-600 dark:text-gray-400 mt-1">{t.refinedSubtitle.replace('{userAnswer}', userAnswer)}</p>
       </div>
       
-      <div className="relative w-full max-w-2xl mx-auto text-left bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl border-l-8 border-green-500">
-        <div className="absolute -top-3 right-4 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase shadow-md flex items-center gap-1">
+      <div ref={setCardNode} className="relative w-full max-w-2xl mx-auto text-left bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl border-l-8 border-green-500">
+        <CardActions cardElement={cardNode} prediction={prediction} t={t} />
+        <div className="absolute -top-3 left-4 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase shadow-md flex items-center gap-1">
             <CheckCircle2 size={14} />
             {t.confirmedBadge}
         </div>

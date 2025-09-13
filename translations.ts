@@ -54,6 +54,8 @@ export const translations = {
     classificationStepsLabel: 'Classification Process (KUMHS)',
     tariffLabel: 'Import Tariff',
     btkiInfo: 'Predictions for Indonesian language are based on BTKI/KUMHS rules.',
+    copyMarkdownTooltip: 'Copy as Markdown',
+    downloadPdfTooltip: 'Download as PDF',
 
     // ClarificationPrompt
     clarificationTitle: 'Refine Your Prediction',
@@ -118,6 +120,8 @@ export const translations = {
     classificationStepsLabel: 'Proses Klasifikasi (KUMHS)',
     tariffLabel: 'Tarif Bea Masuk',
     btkiInfo: 'Prediksi untuk bahasa Indonesia didasarkan pada aturan BTKI/KUMHS.',
+    copyMarkdownTooltip: 'Salin sebagai Markdown',
+    downloadPdfTooltip: 'Unduh sebagai PDF',
 
     // ClarificationPrompt
     clarificationTitle: 'Sempurnakan Prediksi Anda',
@@ -182,6 +186,8 @@ export const translations = {
     classificationStepsLabel: '分類プロセス (KUMHS)',
     tariffLabel: '輸入関税',
     btkiInfo: 'インドネシア語の予測は、BTKI/KUMHS規則に基づいています。',
+    copyMarkdownTooltip: 'マークダウンとしてコピー',
+    downloadPdfTooltip: 'PDFとしてダウンロード',
 
     // ClarificationPrompt
     clarificationTitle: '予測を絞り込む',
