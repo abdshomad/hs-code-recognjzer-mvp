@@ -1,15 +1,24 @@
 import React from 'react';
 import type { HsCodePrediction } from '../types';
-import type { translations } from '../translations';
+import type { translations, Language } from '../translations';
+import { Info } from 'lucide-react';
+import { MarkdownDisplay } from './MarkdownDisplay';
 
 interface ResultsDisplayProps {
   predictions: HsCodePrediction[];
   t: (typeof translations)['en'];
+  language: Language;
 }
 
-export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ predictions, t }) => {
+export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ predictions, t, language }) => {
   return (
     <div className="p-6 md:p-10 bg-gray-50 dark:bg-gray-900/50">
+      {language === 'id' && (
+        <div className="mb-6 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg flex items-center justify-center text-sm text-blue-800 dark:text-blue-200">
+            <Info size={16} className="mr-2 flex-shrink-0" />
+            <span>{t.btkiInfo}</span>
+        </div>
+      )}
       <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-200">{t.resultsTitle}</h2>
       
       <div className="space-y-6">
@@ -41,11 +50,23 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ predictions, t }
                    <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">{t.descriptionLabel}</p>
                    <p className="text-lg font-semibold text-gray-900 dark:text-white">{prediction.description}</p>
                 </div>
+                {prediction.tariff && (
+                    <div className="flex-shrink-0 md:ml-6 md:text-left">
+                        <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">{t.tariffLabel}</p>
+                        <p className="text-lg font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-md inline-block">{prediction.tariff}</p>
+                    </div>
+                )}
               </div>
                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">{t.reasoningLabel}</p>
                   <p className="text-gray-600 dark:text-gray-300 text-sm">{prediction.reasoning}</p>
                </div>
+               {language === 'id' && prediction.classification_steps && (
+                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                   <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">{t.classificationStepsLabel}</p>
+                   <MarkdownDisplay content={prediction.classification_steps} />
+                 </div>
+               )}
             </div>
           )
         })}

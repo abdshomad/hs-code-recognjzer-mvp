@@ -51,6 +51,9 @@ export const translations = {
     hsCodeLabel: 'HS Code',
     descriptionLabel: 'Description',
     reasoningLabel: 'Reasoning',
+    classificationStepsLabel: 'Classification Process (KUMHS)',
+    tariffLabel: 'Import Tariff',
+    btkiInfo: 'Predictions for Indonesian language are based on BTKI/KUMHS rules.',
 
     // ClarificationPrompt
     clarificationTitle: 'Refine Your Prediction',
@@ -112,6 +115,9 @@ export const translations = {
     hsCodeLabel: 'Kode HS',
     descriptionLabel: 'Deskripsi',
     reasoningLabel: 'Alasan',
+    classificationStepsLabel: 'Proses Klasifikasi (KUMHS)',
+    tariffLabel: 'Tarif Bea Masuk',
+    btkiInfo: 'Prediksi untuk bahasa Indonesia didasarkan pada aturan BTKI/KUMHS.',
 
     // ClarificationPrompt
     clarificationTitle: 'Sempurnakan Prediksi Anda',
@@ -173,6 +179,9 @@ export const translations = {
     hsCodeLabel: 'HSコード',
     descriptionLabel: '説明',
     reasoningLabel: '理由',
+    classificationStepsLabel: '分類プロセス (KUMHS)',
+    tariffLabel: '輸入関税',
+    btkiInfo: 'インドネシア語の予測は、BTKI/KUMHS規則に基づいています。',
 
     // ClarificationPrompt
     clarificationTitle: '予測を絞り込む',

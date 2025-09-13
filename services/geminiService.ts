@@ -23,6 +23,14 @@ const hsCodePredictionSchema = {
       type: Type.STRING,
       description: "A brief explanation for why this HS code is suggested based on the image.",
     },
+    tariff: {
+      type: Type.STRING,
+      description: "The import duty tariff information (e.g., 'BM 5%') based on Indonesian regulations (BTKI), if available. Otherwise, null or an empty string.",
+    },
+    classification_steps: {
+        type: Type.STRING,
+        description: "A single string outlining the step-by-step classification process according to KUMHS/BTKI rules, formatted as a Markdown numbered list (e.g., '1. Identifikasi barang...\\n2. Berdasarkan KUMHS...'). Required for Indonesian responses.",
+    }
   },
   required: ["hs_code", "description", "reasoning"],
 };
@@ -58,13 +66,15 @@ export const predictHsCodeFromImage = async (base64Image: string, mimeType: stri
   };
   
   const languageInstruction = language === 'id' 
-    ? " The 'description' and 'reasoning' fields in your JSON response must be in Indonesian."
+    ? " The 'description', 'reasoning', and 'tariff' fields in your JSON response must be in Indonesian. The 'classification_steps' must also be in Indonesian. The prediction must follow the Buku Tarif Kepabeanan Indonesia (BTKI) and KUMHS rules. Include import duty tariff information (Bea Masuk) if available."
     : language === 'ja'
     ? " The 'description' and 'reasoning' fields in your JSON response must be in Japanese."
     : "";
 
   const textPart = {
-    text: `Analyze the item in this image. As an expert in international trade and customs classification, identify the product and provide the three most likely 6-digit Harmonized System (HS) codes. For each code, provide a description and a brief reasoning. The primary and most likely suggestion should be first.${languageInstruction}`,
+    text: language === 'id'
+      ? `Analyze the item in this image. As an expert in Indonesian customs classification, identify the product and provide the three most likely 6-digit Harmonized System (HS) codes based on Buku Tarif Kepabeanan Indonesia (BTKI) and KUMHS rules. For each code, provide a description, a brief reasoning, the applicable import duty tariff (Bea Masuk), and a step-by-step breakdown of the classification process according to Ketentuan Umum untuk Menginterpretasi Harmonized System (KUMHS), formatted as a single Markdown string using a numbered list. The primary and most likely suggestion should be first.${languageInstruction}`
+      : `Analyze the item in this image. As an expert in international trade and customs classification, identify the product and provide the three most likely 6-digit Harmonized System (HS) codes. For each code, provide a description and a brief reasoning. The primary and most likely suggestion should be first.${languageInstruction}`,
   };
 
   try {
@@ -107,8 +117,12 @@ export const getClarification = async (predictions: HsCodePrediction[], language
       : language === 'ja'
       ? " The 'question' and 'options' in your JSON response must be in Japanese."
       : "";
+      
+    const promptContext = language === 'id'
+      ? "Based on the following HS code suggestions for a product, which are based on Indonesian BTKI rules, generate a single, concise question"
+      : "Based on the following HS code suggestions for a product, generate a single, concise question";
 
-    const prompt = `Based on the following HS code suggestions for a product, generate a single, concise question to ask the user that will help them determine the correct code. The question should be simple and highlight the most important distinguishing feature (e.g., "What is the primary material?", "What is its main use?"). Also provide 2-4 short, distinct options for the user to choose from as answers.${languageInstruction}
+    const prompt = `${promptContext} to ask the user that will help them determine the correct code. The question should be simple and highlight the most important distinguishing feature (e.g., "What is the primary material?", "What is its main use?"). Also provide 2-4 short, distinct options for the user to choose from as answers.${languageInstruction}
 
 Suggestions:
 ${formattedPredictions}
@@ -155,13 +169,21 @@ export const getRefinedPrediction = async (
     };
 
     const languageInstruction = language === 'id'
-      ? " The 'description' and 'reasoning' fields in your JSON response must be in Indonesian."
+      ? " The 'description', 'reasoning', 'tariff', and 'classification_steps' fields in your JSON response must be in Indonesian. Your final decision must be compliant with Buku Tarif Kepabeanan Indonesia (BTKI)."
       : language === 'ja'
       ? " The 'description' and 'reasoning' fields in your JSON response must be in Japanese."
       : "";
 
     const textPart = {
-        text: `An image of a product was analyzed, resulting in these initial HS Code suggestions:
+        text: language === 'id'
+          ? `An image of a product was analyzed, resulting in these initial HS Code suggestions based on Indonesian BTKI rules:
+${formattedPredictions}
+
+To clarify, this question was asked: "${clarification.question}"
+The user provided this answer: "${userAnswer}"
+
+Based on the user's answer, please provide the single, most accurate 6-digit HS code according to Buku Tarif Kepabeanan Indonesia (BTKI). Your response must include the final HS code, a clear description of the product, the applicable import duty tariff (Bea Masuk), detailed reasoning explaining why this code is correct given the user's clarification, and the step-by-step classification process according to KUMHS, formatted as a single Markdown string using a numbered list. The reasoning should explicitly reference the user's answer.${languageInstruction}`
+          : `An image of a product was analyzed, resulting in these initial HS Code suggestions:
 ${formattedPredictions}
 
 To clarify, this question was asked: "${clarification.question}"

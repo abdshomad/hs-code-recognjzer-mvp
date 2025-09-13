@@ -224,7 +224,7 @@ const App: React.FC = () => {
           
           <div className="flex flex-col">
             {initialPredictions.length > 0 && !isLoading && (
-              <ResultsDisplay predictions={initialPredictions} t={t}/>
+              <ResultsDisplay predictions={initialPredictions} t={t} language={language}/>
             )}
 
             {clarification && !refinedPrediction && !isRefining && (
@@ -242,6 +242,7 @@ const App: React.FC = () => {
                 prediction={refinedPrediction}
                 userAnswer={userAnswer}
                 t={t}
+                language={language}
               />
             )}
           </div>
