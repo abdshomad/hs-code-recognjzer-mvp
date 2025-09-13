@@ -2,10 +2,19 @@ export const translations = {
   en: {
     // Header
     headerTitle: 'AI HS Code Predictor',
+    logoutButton: 'Sign Out',
+    predictionsLeft: 'Predictions Left: {count}',
     
     // Footer
-    footerText: 'Powered by Gemini API. For informational purposes only.',
+    footerText: 'Suggestions are for informational purposes only. Consult a customs professional for official classification.',
     
+    // Login / Welcome Screen
+    welcomeTitle: 'Welcome to the AI HS Code Predictor',
+    guestLimitInfo: 'Anonymous users are allowed 7 predictions per day.',
+    registeredLimitInfo: 'Sign in to get 19 predictions per day.',
+    continueAsGuestButton: 'Continue as Guest',
+    loginButton: 'Sign In with Google',
+
     // ImageUploader
     uploaderTitle: 'Click to upload',
     uploaderTitleHighlight: 'or drag and drop',
@@ -20,6 +29,7 @@ export const translations = {
     errorReadingFile: 'Failed to read the image file.',
     errorUnknown: 'An unknown error occurred.',
     errorRefinement: 'An unknown error occurred during refinement.',
+    limitReachedError: 'You have reached your daily prediction limit. Please try again tomorrow.',
 
     // Loader
     loaderAnalyzing: 'Analyzing image...',
@@ -53,9 +63,18 @@ export const translations = {
   id: {
     // Header
     headerTitle: 'Prediktor Kode HS AI',
+    logoutButton: 'Keluar',
+    predictionsLeft: 'Sisa Prediksi: {count}',
     
     // Footer
-    footerText: 'Didukung oleh Gemini API. Hanya untuk tujuan informasi.',
+    footerText: 'Saran hanya untuk tujuan informasi. Konsultasikan dengan profesional bea cukai untuk klasifikasi resmi.',
+
+    // Login / Welcome Screen
+    welcomeTitle: 'Selamat Datang di Prediktor Kode HS AI',
+    guestLimitInfo: 'Pengguna anonim diizinkan 7 prediksi per hari.',
+    registeredLimitInfo: 'Masuk untuk mendapatkan 19 prediksi per hari.',
+    continueAsGuestButton: 'Lanjutkan sebagai Tamu',
+    loginButton: 'Masuk dengan Google',
     
     // ImageUploader
     uploaderTitle: 'Klik untuk mengunggah',
@@ -71,6 +90,7 @@ export const translations = {
     errorReadingFile: 'Gagal membaca file gambar.',
     errorUnknown: 'Terjadi kesalahan yang tidak diketahui.',
     errorRefinement: 'Terjadi kesalahan yang tidak diketahui saat penyempurnaan.',
+    limitReachedError: 'Anda telah mencapai batas prediksi harian Anda. Silakan coba lagi besok.',
 
     // Loader
     loaderAnalyzing: 'Menganalisis gambar...',
@@ -104,9 +124,18 @@ export const translations = {
   ja: {
     // Header
     headerTitle: 'AI HSコード予測',
+    logoutButton: 'サインアウト',
+    predictionsLeft: '残りの予測回数: {count}',
     
     // Footer
-    footerText: 'Gemini APIを利用しています。情報提供のみを目的としています。',
+    footerText: '提案は情報提供のみを目的としています。公式な分類については、税関の専門家にご相談ください。',
+
+    // Login / Welcome Screen
+    welcomeTitle: 'AI HSコード予測へようこそ',
+    guestLimitInfo: '匿名ユーザーは1日7回まで予測できます。',
+    registeredLimitInfo: 'サインインすると、1日19回まで予測できます。',
+    continueAsGuestButton: 'ゲストとして続行',
+    loginButton: 'Googleでサインイン',
     
     // ImageUploader
     uploaderTitle: 'クリックしてアップロード',
@@ -122,6 +151,7 @@ export const translations = {
     errorReadingFile: '画像ファイルの読み込みに失敗しました。',
     errorUnknown: '不明なエラーが発生しました。',
     errorRefinement: '絞り込み中に不明なエラーが発生しました。',
+    limitReachedError: '1日の予測上限に達しました。明日もう一度お試しください。',
 
     // Loader
     loaderAnalyzing: '画像を分析中...',

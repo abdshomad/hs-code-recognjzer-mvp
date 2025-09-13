@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { ImageUploader } from './components/ImageUploader';
 import { ResultsDisplay } from './components/ResultsDisplay';
@@ -9,6 +9,9 @@ import { predictHsCodeFromImage, getClarification, getRefinedPrediction } from '
 import type { HsCodePrediction, Clarification } from './types';
 import { Footer } from './components/Footer';
 import { translations, Language } from './translations';
+import { Login } from './components/Login';
+
+type UserStatus = 'onboarding' | 'guest' | 'loggedIn';
 
 const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>('en');
@@ -23,9 +26,44 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRefining, setIsRefining] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [userStatus, setUserStatus] = useState<UserStatus>('onboarding');
+  const [predictionsToday, setPredictionsToday] = useState<number>(0);
+
+  const isLoggedIn = userStatus === 'loggedIn';
+  const MAX_PREDICTIONS = isLoggedIn ? 19 : 7;
+
+  useEffect(() => {
+    try {
+      const storedData = localStorage.getItem('predictionCount');
+      const today = new Date().toISOString().split('T')[0];
+      if (storedData) {
+        const { count, date } = JSON.parse(storedData);
+        if (date === today) {
+          setPredictionsToday(count);
+        } else {
+          localStorage.setItem('predictionCount', JSON.stringify({ count: 0, date: today }));
+          setPredictionsToday(0);
+        }
+      } else {
+        localStorage.setItem('predictionCount', JSON.stringify({ count: 0, date: today }));
+      }
+    } catch (e) {
+      console.error("Failed to read from localStorage", e);
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem('predictionCount', JSON.stringify({ count: 0, date: today }));
+    }
+  }, []);
 
   const handleLanguageChange = (lang: Language) => {
     setLanguage(lang);
+  };
+  
+  const handleLogin = () => setUserStatus('loggedIn');
+  const handleContinueAsGuest = () => setUserStatus('guest');
+
+  const handleLogout = () => {
+    setUserStatus('onboarding');
+    resetState();
   };
 
   const resetState = () => {
@@ -56,6 +94,11 @@ const App: React.FC = () => {
   
   const handlePredict = useCallback(async () => {
     if (!image || !imageMimeType) return;
+    
+    if (predictionsToday >= MAX_PREDICTIONS) {
+      setError(t.limitReachedError);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -67,6 +110,12 @@ const App: React.FC = () => {
     try {
       const result = await predictHsCodeFromImage(image, imageMimeType, language);
       setInitialPredictions(result);
+
+      const newCount = predictionsToday + 1;
+      setPredictionsToday(newCount);
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem('predictionCount', JSON.stringify({ count: newCount, date: today }));
+
       if (result.length > 1) {
         try {
            const clarif = await getClarification(result, language);
@@ -82,7 +131,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [image, imageMimeType, t, language]);
+  }, [image, imageMimeType, t, language, predictionsToday, MAX_PREDICTIONS]);
 
   const handleSelectOption = useCallback(async (option: string) => {
     if (!image || !imageMimeType || !clarification || initialPredictions.length === 0) return;
@@ -106,9 +155,28 @@ const App: React.FC = () => {
     resetState();
   };
 
+  if (userStatus === 'onboarding') {
+    return (
+      <div className="min-h-screen flex flex-col text-gray-800 dark:text-gray-200 font-sans">
+        <Login 
+          onLogin={handleLogin} 
+          onContinueAsGuest={handleContinueAsGuest} 
+          t={t} 
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col text-gray-800 dark:text-gray-200 font-sans">
-      <Header language={language} onLanguageChange={handleLanguageChange} t={t} />
+      <Header 
+        language={language} 
+        onLanguageChange={handleLanguageChange} 
+        t={t} 
+        isLoggedIn={isLoggedIn}
+        onLogout={handleLogout}
+        predictionsToday={predictionsToday}
+      />
       <main className="flex-grow container mx-auto p-4 md:p-8 flex flex-col items-center">
         <div className="w-full max-w-4xl bg-white dark:bg-gray-800 shadow-2xl rounded-2xl overflow-hidden">
           {!image ? (
@@ -128,8 +196,8 @@ const App: React.FC = () => {
                        {initialPredictions.length === 0 && !error && (
                          <button
                            onClick={handlePredict}
-                           className="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800"
-                           disabled={isLoading}
+                           className="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800 disabled:bg-indigo-400 dark:disabled:bg-indigo-800 disabled:cursor-not-allowed disabled:scale-100"
+                           disabled={isLoading || predictionsToday >= MAX_PREDICTIONS}
                          >
                            {t.predictButton}
                          </button>
@@ -177,7 +245,6 @@ const App: React.FC = () => {
               />
             )}
           </div>
-
         </div>
       </main>
       <Footer t={t} />
