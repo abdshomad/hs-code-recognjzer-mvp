@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import type { HsCodePrediction, Clarification } from '../types';
+import type { HsCodePrediction, Clarification, PredictionResult } from '../types';
 import type { Language } from '../translations';
 
 if (!process.env.API_KEY) {
@@ -40,24 +40,31 @@ const hsCodeSchema = {
   items: hsCodePredictionSchema,
 };
 
-const clarificationSchema = {
+const predictionAndClarificationSchema = {
     type: Type.OBJECT,
     properties: {
-        question: {
-            type: Type.STRING,
-            description: "A single, concise question for the user to help differentiate between HS code options."
-        },
-        options: {
-            type: Type.ARRAY,
-            description: "An array of 2-4 short, distinct string options for the user to choose from as answers.",
-            items: { type: Type.STRING }
+        predictions: hsCodeSchema,
+        clarification: {
+            type: Type.OBJECT,
+            properties: {
+                question: {
+                    type: Type.STRING,
+                    description: "A single, concise question for the user to help differentiate between HS code options."
+                },
+                options: {
+                    type: Type.ARRAY,
+                    description: "An array of 2-4 short, distinct string options for the user to choose from as answers.",
+                    items: { type: Type.STRING }
+                }
+            },
+            description: "A question and options to ask the user ONLY IF the provided HS code suggestions are distinct and need clarification to determine the correct one. If a clarification question is not necessary, this field should be null or omitted.",
         }
     },
-    required: ["question", "options"]
+    required: ["predictions"]
 };
 
 
-export const predictHsCodeFromImage = async (base64Image: string, mimeType: string, language: Language): Promise<HsCodePrediction[]> => {
+export const predictHsCodeFromImage = async (base64Image: string, mimeType: string, language: Language): Promise<PredictionResult> => {
   const imagePart = {
     inlineData: {
       data: base64Image,
@@ -73,8 +80,8 @@ export const predictHsCodeFromImage = async (base64Image: string, mimeType: stri
 
   const textPart = {
     text: language === 'id'
-      ? `Analyze the item in this image. As an expert in Indonesian customs classification, identify the product and provide the three most likely 6-digit Harmonized System (HS) codes based on Buku Tarif Kepabeanan Indonesia (BTKI) and KUMHS rules. For each code, provide a description, a brief reasoning, the applicable import duty tariff (Bea Masuk), and a step-by-step breakdown of the classification process according to Ketentuan Umum untuk Menginterpretasi Harmonized System (KUMHS), formatted as a single Markdown string using a numbered list. The primary and most likely suggestion should be first.${languageInstruction}`
-      : `Analyze the item in this image. As an expert in international trade and customs classification, identify the product and provide the three most likely 6-digit Harmonized System (HS) codes. For each code, provide a description and a brief reasoning. The primary and most likely suggestion should be first.${languageInstruction}`,
+      ? `Analyze the item in this image. As an expert in Indonesian customs classification, identify the product and provide the three most likely 6-digit Harmonized System (HS) codes based on Buku Tarif Kepabeanan Indonesia (BTKI) and KUMHS rules. For each code, provide a description, a brief reasoning, the applicable import duty tariff (Bea Masuk), and a step-by-step breakdown of the classification process according to Ketentuan Umum untuk Menginterpretasi Harmonized System (KUMHS), formatted as a single Markdown string using a numbered list. The primary and most likely suggestion should be first. Additionally, if the suggestions represent genuinely different possibilities for the product's classification (e.g., based on material or primary use), generate a single, concise clarification question with 2-4 short options. If no clarification is needed, the clarification field should be omitted from the JSON response.${languageInstruction}`
+      : `Analyze the item in this image. As an expert in international trade and customs classification, identify the product and provide the three most likely 6-digit Harmonized System (HS) codes. For each code, provide a description and a brief reasoning. The primary and most likely suggestion should be first. Additionally, if the suggestions represent genuinely different possibilities for the product's classification, generate a single, concise clarification question with 2-4 short options. If no clarification is needed, the clarification field should be omitted from the JSON response.${languageInstruction}`,
   };
 
   try {
@@ -83,7 +90,7 @@ export const predictHsCodeFromImage = async (base64Image: string, mimeType: stri
         contents: { parts: [imagePart, textPart] },
         config: {
             responseMimeType: "application/json",
-            responseSchema: hsCodeSchema,
+            responseSchema: predictionAndClarificationSchema,
             temperature: 0.2,
         }
     });
@@ -95,62 +102,22 @@ export const predictHsCodeFromImage = async (base64Image: string, mimeType: stri
 
     const parsedResponse = JSON.parse(jsonText);
     
-    if (Array.isArray(parsedResponse) && parsedResponse.every(item => 'hs_code' in item && 'description' in item)) {
-      return parsedResponse as HsCodePrediction[];
+    if (parsedResponse && Array.isArray(parsedResponse.predictions)) {
+      return parsedResponse as PredictionResult;
     } else {
       throw new Error("API response is not in the expected format.");
     }
   } catch (error) {
     console.error("Error calling Gemini API:", error);
     if (error instanceof Error) {
+        if (error.message.includes('RESOURCE_EXHAUSTED') || error.message.includes('429')) {
+             throw new Error("The service is experiencing high demand. Please try again in a moment.");
+        }
         throw new Error(`Failed to get HS code predictions: ${error.message}`);
     }
     throw new Error("An unknown error occurred while fetching HS code predictions.");
   }
 };
-
-export const getClarification = async (predictions: HsCodePrediction[], language: Language): Promise<Clarification> => {
-    const formattedPredictions = predictions.map(p => `- HS Code ${p.hs_code} (${p.description}): ${p.reasoning}`).join('\n');
-    
-    const languageInstruction = language === 'id'
-      ? " The 'question' and 'options' in your JSON response must be in Indonesian."
-      : language === 'ja'
-      ? " The 'question' and 'options' in your JSON response must be in Japanese."
-      : "";
-      
-    const promptContext = language === 'id'
-      ? "Based on the following HS code suggestions for a product, which are based on Indonesian BTKI rules, generate a single, concise question"
-      : "Based on the following HS code suggestions for a product, generate a single, concise question";
-
-    const prompt = `${promptContext} to ask the user that will help them determine the correct code. The question should be simple and highlight the most important distinguishing feature (e.g., "What is the primary material?", "What is its main use?"). Also provide 2-4 short, distinct options for the user to choose from as answers.${languageInstruction}
-
-Suggestions:
-${formattedPredictions}
-`;
-
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: clarificationSchema,
-            }
-        });
-        const jsonText = response.text;
-        if (!jsonText) {
-            throw new Error("API returned an empty response for clarification.");
-        }
-        return JSON.parse(jsonText) as Clarification;
-    } catch (error) {
-        console.error("Error generating clarification question:", error);
-        if (error instanceof Error) {
-            throw new Error(`Failed to generate clarification question: ${error.message}`);
-        }
-        throw new Error("An unknown error occurred while generating the clarification question.");
-    }
-}
-
 
 export const getRefinedPrediction = async (
     base64Image: string,
@@ -212,6 +179,9 @@ Based on the user's answer, please provide the single, most accurate 6-digit HS 
     } catch (error) {
         console.error("Error getting refined prediction:", error);
         if (error instanceof Error) {
+            if (error.message.includes('RESOURCE_EXHAUSTED') || error.message.includes('429')) {
+                 throw new Error("The service is experiencing high demand. Please try again in a moment.");
+            }
             throw new Error(`Failed to get refined prediction: ${error.message}`);
         }
         throw new Error("An unknown error occurred while getting the refined prediction.");

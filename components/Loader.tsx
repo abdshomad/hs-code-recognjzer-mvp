@@ -13,7 +13,8 @@ export const Loader: React.FC<LoaderProps> = ({ message, t }) => {
   const analysisSteps = t.loaderAnalyzingSteps || [];
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
+    // FIX: Replaced NodeJS.Timeout with ReturnType<typeof setInterval> for robust timer typing in different environments.
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (isAnalyzing && analysisSteps.length > 0) {
       interval = setInterval(() => {
         setCurrentStepIndex((prevIndex) => (prevIndex + 1) % analysisSteps.length);

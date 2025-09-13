@@ -11,3 +11,8 @@ export interface Clarification {
   question: string;
   options: string[];
 }
+
+export interface PredictionResult {
+  predictions: HsCodePrediction[];
+  clarification?: Clarification | null;
+}

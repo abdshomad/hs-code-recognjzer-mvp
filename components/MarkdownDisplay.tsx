@@ -12,8 +12,15 @@ interface MarkdownDisplayProps {
  */
 export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ content }) => {
   const createMarkup = () => {
-    const contentStr = String(content || ''); // Ensure content is a string
+    let contentStr = String(content || ''); // Ensure content is a string
     
+    // Pre-process the string to fix number formatting issues from the model.
+    // This handles numbers split by newlines.
+    // 1. Join digits separated by a newline (e.g., "2\n1" -> "21").
+    contentStr = contentStr.replace(/(?<=\d)\s*[\n\r]\s*(?=\d)/g, '');
+    // 2. Join a word and a number separated by a newline (e.g., "Pos\n2" -> "Pos 2").
+    contentStr = contentStr.replace(/(?<=[a-zA-Z])\s*[\n\r]\s*(?=\d)/g, ' ');
+
     // Check if the content is a multi-line list or a single-line list with embedded numbers
     const lines = contentStr.includes('\n')
       ? contentStr.split('\n')
@@ -30,7 +37,9 @@ export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ content }) => 
         // The first item might not have a number, but subsequent ones will.
         // We still need to strip the numbers from the items that have them.
         const cleanLine = boldedLine.replace(/^\s*(\d+\.|[-*])\s*/, '');
-        return `<li>${cleanLine}</li>`;
+        // Fix for numbers that are incorrectly spaced out (e.g., "0 4 1 0" becomes "0410")
+        const fixedNumberLine = cleanLine.replace(/(\d)\s+(?=\d)/g, '$1');
+        return `<li>${fixedNumberLine}</li>`;
       })
       .join('');
     

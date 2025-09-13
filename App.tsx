@@ -5,7 +5,7 @@ import { ResultsDisplay } from './components/ResultsDisplay';
 import { ClarificationPrompt } from './components/ClarificationPrompt';
 import { RefinedResultDisplay } from './components/RefinedResultDisplay';
 import { Loader } from './components/Loader';
-import { predictHsCodeFromImage, getClarification, getRefinedPrediction } from './services/geminiService';
+import { predictHsCodeFromImage, getRefinedPrediction } from './services/geminiService';
 import type { HsCodePrediction, Clarification } from './types';
 import { Footer } from './components/Footer';
 import { translations, Language } from './translations';
@@ -14,7 +14,7 @@ import { Login } from './components/Login';
 type UserStatus = 'onboarding' | 'guest' | 'loggedIn';
 
 const App: React.FC = () => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('id');
   const t = translations[language];
 
   const [image, setImage] = useState<string | null>(null);
@@ -108,22 +108,16 @@ const App: React.FC = () => {
     setRefinedPrediction(null);
 
     try {
-      const result = await predictHsCodeFromImage(image, imageMimeType, language);
-      setInitialPredictions(result);
+      const { predictions, clarification } = await predictHsCodeFromImage(image, imageMimeType, language);
+      setInitialPredictions(predictions);
 
       const newCount = predictionsToday + 1;
       setPredictionsToday(newCount);
       const today = new Date().toISOString().split('T')[0];
       localStorage.setItem('predictionCount', JSON.stringify({ count: newCount, date: today }));
 
-      if (result.length > 1) {
-        try {
-           const clarif = await getClarification(result, language);
-           setClarification(clarif);
-        } catch (clarificationError) {
-            console.error('Could not get clarification:', clarificationError);
-            setClarification(null); 
-        }
+      if (clarification) {
+         setClarification(clarification);
       }
     } catch (err) {
       console.error(err);
@@ -161,7 +155,9 @@ const App: React.FC = () => {
         <Login 
           onLogin={handleLogin} 
           onContinueAsGuest={handleContinueAsGuest} 
-          t={t} 
+          t={t}
+          language={language}
+          onLanguageChange={handleLanguageChange}
         />
       </div>
     );
